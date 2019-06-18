@@ -1,14 +1,14 @@
 import React from 'react'
 import axios from 'axios'
 
-export default class Home extends React.Component {
+class Home extends React.Component {
 
   constructor(props) {
     super(props)
     this.state = {
       input: '',
       movies: [],
-      status: 'done'
+      status: 'done',
     }
   }
 
@@ -17,18 +17,46 @@ export default class Home extends React.Component {
     axios.get(`http://freemdb.com/api/v1/Movies?Title=${this.state.input}`)
       .then(response => {
         if (response.data.items.length > 0) {
-          this.setState({ movies: response.data.items, status: 'done' })
-          console.log(this.state.movies)
+
+          let newState = response.data.items.map(e => {
+            if (this.props.favorites.includes(e)) {
+              return {
+                title: e.title,
+                year: e.year,
+                contentRating: e.contentRating,
+                country: e.country,
+                creator: e.creator,
+                genre: e.genre,
+                id: e.id,
+                language: e.language,
+                posterLink: e.posterLink,
+                runtime: e.runtime,
+                starRating: e.starRating,
+                storyline: e.storyline,
+                favor: true
+              }
+            }
+            else {
+              return e
+            }
+
+          }
+          )
+          this.setState({ movies: newState, status: 'done' })
         }
         else {
           this.setState({ status: 'none' })
         }
+        console.log(this.state.movies)
 
       })
       .catch(err => {
         console.log(err)
       })
   }
+
+
+
 
 
   render() {
@@ -49,7 +77,7 @@ export default class Home extends React.Component {
               <div key={item.id.toString()} className="card" >
                 <div className="card-divider input-grous">
                   <div className='input-group-field'>  {item.title}</div>
-                  <button onClick={this.props.favorites.includes(item) ? () => this.props.removeFavor(item) : () => this.props.addToFavor(item)} className='input-group-label'><span style={{ color: this.props.favorites.includes(item) ? 'red' : 'black' }} className='icon icon-heart'></span></button>
+                  <button onClick={this.props.favorites.includes(item) || item.favor ? () => this.props.removeFavor(item) : () => this.props.addToFavor(item)} className='input-group-label'><span style={{ color: this.props.favorites.includes(item) || item.favor ? 'red' : 'black' }} className='icon icon-heart'></span></button>
                 </div>
                 <div className="card-section">
                   <img style={{ float: "right" }} src={item.posterLink} alt="error"></img>
@@ -82,3 +110,4 @@ export default class Home extends React.Component {
     )
   }
 }
+export default Home
